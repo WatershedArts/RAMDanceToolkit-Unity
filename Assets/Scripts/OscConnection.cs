@@ -5,7 +5,7 @@ using UnityEngine;
 public class OscConnection : MonoBehaviour
 {
 	public ushort ListenPort = 10000;
-	public OscListener OscListener { get; private set; }
+	public Rug.Osc.OscListener OscListener { get; private set; }
 
 	private void Awake()
 	{
