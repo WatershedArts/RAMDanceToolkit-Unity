@@ -7,11 +7,8 @@ using System.Linq;
 
 public class RAMActorManager: MonoBehaviour 
 {
-	public GameObject actorContainer;
-	public GameObject nodePrefab;
+	public GameObject ActorPrefab;
 	private OscConnection oscConnection;
-
-	//private Phil.OscSyncListener oscSyncListener;
 
 	public string OscAddress = "/ram/skeleton";
 
@@ -106,34 +103,14 @@ public class RAMActorManager: MonoBehaviour
 	//--------------------------------------------------------
 	// * Generate Actor
 	//--------------------------------------------------------
-	public void GenerateNewActor(string actorName)
+	IEnumerator GenerateNewActor(string actorName)
 	{
 		// Make a GameObject for the Actor. This make it easier to Delete Later On
-		GameObject ActorContainer = Instantiate(actorContainer, new Vector3(0, 0, 0), transform.rotation) as GameObject;
-		ActorContainer.name = actorName;
-
-		// Make an Empty Dictionary of Nodes that will be passed in to the RAMActor Component
-		Dictionary<string, GameObject> controlNodes = new Dictionary<string, GameObject>();
-
-		// Iterate through the available nodes and generate a node prefab
-		foreach (KeyValuePair<string, Vector3> node in defaultNodes)
-		{
-			GameObject newNode = Instantiate(nodePrefab, node.Value, transform.rotation) as GameObject;
-			newNode.name = node.Key;
-			newNode.transform.localScale = new Vector3(5, 5, 5);
-
-			// Add the Newely instantiated Nodes to the ActorContainer
-			newNode.transform.parent = ActorContainer.transform;
-			controlNodes.Add(node.Key, newNode);
-		}
-
-		// Add the New Actor to the Actors list
-		actors.Add(actorName, new RAMActor(actorName,controlNodes));
-
-		// You Could Scale the actor Uncomment this
-		//ActorContainer.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-
-		ActorContainer.transform.parent = transform;
+		GameObject NewActor = Instantiate(ActorPrefab, new Vector3(0, 0, 0), transform.rotation, transform) as GameObject;
+		NewActor.name = actorName;
+		actors.Add(actorName, new RAMActor(NewActor));
+		Debug.Log("Have Instantiated New Actor: " + actorName);
+		yield return new WaitForSeconds(2);
 	}
 
 	//--------------------------------------------------------
@@ -148,7 +125,7 @@ public class RAMActorManager: MonoBehaviour
 		MakeDefaultNodes();
 
 		// Generate a Default Skeleton
-		GenerateNewActor("DefaultRAMMan");
+		StartCoroutine(GenerateNewActor("DefaultRAMMan"));
 
 		// Activate the Checkers 
 		InvokeRepeating("CheckForActorEntered", 0.0f, 5.0f);
@@ -160,7 +137,6 @@ public class RAMActorManager: MonoBehaviour
 	//--------------------------------------------------------
 	void CheckForActorEntered()
 	{
-		//Debug.Log("Checking for New Actors");
 		try
 		{
 			// If the actors Dictionary Does NOT contain the New Actors Name 
@@ -169,7 +145,7 @@ public class RAMActorManager: MonoBehaviour
 				Debug.Log("We Don't have a " + (string)newMessage[0]);
 
 				// Generate New Actor
-				GenerateNewActor((string)newMessage[0]);
+				StartCoroutine(GenerateNewActor((string)newMessage[0]));
 			}
 		}
 		catch (System.Exception ex)
@@ -183,7 +159,6 @@ public class RAMActorManager: MonoBehaviour
 	//--------------------------------------------------------
 	void CheckForActorExited()
 	{
-		//Debug.Log("Checking for Inactive Actors");
 		try
 		{
 			// Make a list of the current Actors in the OSC Message
@@ -217,34 +192,31 @@ public class RAMActorManager: MonoBehaviour
 		// If we have a Valid OSC Message
 		try
 		{
-			// Loop through the message
-			for (int i = 0; i < newMessage.Count; i++)
+			// Loop through the current actors in the Dictionary
+			foreach (KeyValuePair<string, RAMActor> actor in actors)
 			{
-				// Loop through the current actors in the Dictionary
-				foreach (KeyValuePair<string, RAMActor> actor in actors)
+				// Grab all of the Positions from the Message
+				Dictionary<string, Vector3> positions = new Dictionary<string, Vector3>();
+				// Loop through the message
+				for (int i = 0; i < newMessage.Count; i++)
 				{
 					// If the OSC Message Actor Name Matches any actor dictionary
 					if (newMessage[0].Equals(actor.Key))
 					{
-						// Grab all of the Positions from the Message
-						Dictionary<string, Vector3> positions = new Dictionary<string, Vector3>();
-
 						// Loop through the defaultNames to make sure they are Valid
 						foreach (KeyValuePair<string, Vector3> node in defaultNodes)
 						{
 							// If the OSC Message Element matches the valid nodes
 							if (newMessage[i].Equals(node.Key))
 							{
-								// Add the Position to the positions Dictionary
+								//Debug.Log("Current Actor: "+actor.Key+" Current Limb: " + node.Key);
 								positions.Add(node.Key,new Vector3((float)newMessage[i + 1], (float)newMessage[i + 2], (float)newMessage[i + 3]));
 							}
 						}
-						// Pass through the positions to the RAM Actor Avatar
-						actors[actor.Key].MoveNodes(positions);
-					}
+					}	
 				}
+				actors[actor.Key].MoveNodes(positions);
 			}
-
 		}
 		catch (System.Exception ex)
 		{
