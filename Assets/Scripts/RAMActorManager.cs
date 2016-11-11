@@ -125,7 +125,7 @@ public class RAMActorManager: MonoBehaviour
 		MakeDefaultNodes();
 
 		// Generate a Default Skeleton
-		StartCoroutine(GenerateNewActor("DefaultRAMMan"));
+		StartCoroutine(GenerateNewActor("DefaultRAMActor"));
 
 		// Activate the Checkers 
 		InvokeRepeating("CheckForActorEntered", 0.0f, 5.0f);
