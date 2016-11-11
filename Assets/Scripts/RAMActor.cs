@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class RAMActor : MonoBehaviour 
 {
 	private string actorName = "";
-	private Dictionary<string, GameObject> nodes = new Dictionary<string, GameObject>();
+	public Dictionary<string, GameObject> nodes = new Dictionary<string, GameObject>();
 	private Transform[] tmpNodes;
 
 	LineRenderer leftLower;
@@ -119,5 +119,15 @@ public class RAMActor : MonoBehaviour
 		{
 			nodes[node.Key].transform.position = node.Value;
 		}
+	}
+
+	public Vector3 GetLimbCoordinates(string limb)
+	{
+		if(nodes.ContainsKey(limb)) 
+		{
+			return nodes[limb].transform.position;
+		}
+		Debug.Log("Joint Does Not Exist");
+		return new Vector3(0, 0, 0);
 	}
 }
