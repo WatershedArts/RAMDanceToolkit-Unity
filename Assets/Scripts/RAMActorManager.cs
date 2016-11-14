@@ -155,7 +155,7 @@ public class RAMActorManager: MonoBehaviour
 	}
 
 	//--------------------------------------------------------
-	// * Update Frame
+	// * Check whether the Actor has exitted
 	//--------------------------------------------------------
 	void CheckForActorExited()
 	{
