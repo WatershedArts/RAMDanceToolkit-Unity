@@ -4,6 +4,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using Rug.Osc;
 using System.Linq;
+using UnityEditor;
+using UnityEngine.UI;
 
 public class RAMActorManager: MonoBehaviour 
 {
@@ -16,6 +18,15 @@ public class RAMActorManager: MonoBehaviour
 	Dictionary<string, RAMActor> actors = new Dictionary<string, RAMActor>();
 
 	private OscMessage newMessage;
+
+	public GameObject trail1;
+	public GameObject trail2;
+
+	public string WhichActor = "ACTOR NAME";
+	public string WhichJoint1 = "HIPS";
+	public string WhichJoint2 = "HIPS";
+
+
 
 	//--------------------------------------------------------
 	// * Make the Default Nodes
@@ -197,6 +208,7 @@ public class RAMActorManager: MonoBehaviour
 			{
 				// Grab all of the Positions from the Message
 				Dictionary<string, Vector3> positions = new Dictionary<string, Vector3>();
+				Dictionary<string, Quaternion> rotations = new Dictionary<string, Quaternion>();
 				// Loop through the message
 				for (int i = 0; i < newMessage.Count; i++)
 				{
@@ -211,16 +223,23 @@ public class RAMActorManager: MonoBehaviour
 							{
 								//Debug.Log("Current Actor: "+actor.Key+" Current Limb: " + node.Key);
 								positions.Add(node.Key,new Vector3((float)newMessage[i + 1], (float)newMessage[i + 2], (float)newMessage[i + 3]));
+								rotations.Add(node.Key, new Quaternion((float)newMessage[i + 4], (float)newMessage[i + 5], (float)newMessage[i + 6], (float)newMessage[i + 7])); //new Vector3((float)newMessage[i + 1], (float)newMessage[i + 2], (float)newMessage[i + 3]));
 							}
 						}
 					}	
 				}
-				actors[actor.Key].MoveNodes(positions);
+				actors[actor.Key].MoveNodes(positions,rotations);
 			}
 		}
 		catch (System.Exception ex)
 		{
 			// Is Null
+		}
+
+		if (actors.ContainsKey(WhichActor))
+		{
+			trail1.transform.position = actors[WhichActor].GetLimbCoordinates(WhichJoint1);
+			trail2.transform.position = actors[WhichActor].GetLimbCoordinates(WhichJoint2);
 		}
 	}
 }
