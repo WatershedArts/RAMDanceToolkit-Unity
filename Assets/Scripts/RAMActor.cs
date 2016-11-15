@@ -85,7 +85,7 @@ public class RAMActor : MonoBehaviour
 		}
 	}
 
-	public void MoveNodes(Dictionary<string, Vector3> positions)
+	public void MoveNodes(Dictionary<string, Vector3> positions,Dictionary<string, Quaternion> rotations)
 	{
 		rightUpper.SetPosition(0, positions["RIGHT_HAND"]);
 		rightUpper.SetPosition(1, positions["RIGHT_WRIST"]);
@@ -115,9 +115,15 @@ public class RAMActor : MonoBehaviour
 		leftLower.SetPosition(3, positions["LEFT_HIP"]);
 		leftLower.SetPosition(4, positions["HIPS"]);
 
+
+
 		foreach (KeyValuePair<string, Vector3> node in positions)
 		{
 			nodes[node.Key].transform.position = node.Value;
+		}
+		foreach (KeyValuePair<string, Quaternion> node in rotations)
+		{
+			nodes[node.Key].transform.rotation = node.Value;
 		}
 	}
 
