@@ -133,7 +133,17 @@ public class RAMActor : MonoBehaviour
 		{
 			return nodes[limb].transform.position;
 		}
-		Debug.Log("Joint Does Not Exist");
+		Debug.Log("Joint Does Not Exist: " + limb);
 		return new Vector3(0, 0, 0);
+	}
+
+	public Quaternion GetLimbRotation(string limb)
+	{
+		if (nodes.ContainsKey(limb))
+		{
+			return nodes[limb].transform.rotation;
+		}
+		Debug.Log("Joint Does Not Exist: " + limb);
+		return new Quaternion(0, 0, 0, 0);
 	}
 }

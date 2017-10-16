@@ -6,7 +6,7 @@ public class CameraRotate : MonoBehaviour {
 	public GameObject Actor;
 	public bool RotateCamera = false;
 	public bool LookAtActor = false;
-	private Vector3 lookAtPoint = new Vector3(0,150,0);
+	private Vector3 lookAtPoint = new Vector3(0,10,0);
 	public float rotationMultiplier = 1.0f;
 
 	// Use this for initialization

@@ -31,3 +31,7 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+Robot_Normal.tga.meta
+Robot_Normal.tga
+Robot_Color.tga
+Robot_Color.tga.meta

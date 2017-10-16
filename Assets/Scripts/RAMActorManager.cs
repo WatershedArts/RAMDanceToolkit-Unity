@@ -26,40 +26,42 @@ public class RAMActorManager: MonoBehaviour
 	public string WhichJoint1 = "HIPS";
 	public string WhichJoint2 = "HIPS";
 
-
+	public GameObject Kyle;
+	private Transform[] tmpNodes;
+	private Dictionary<string, GameObject> kyleNodes = new Dictionary<string, GameObject>();
 
 	//--------------------------------------------------------
 	// * Make the Default Nodes
 	//--------------------------------------------------------
 	void MakeDefaultNodes()
 	{
-		defaultNodes.Add("HIPS", new Vector3(0, 112, 0));
-		defaultNodes.Add("ABDOMEN", new Vector3(0, 160, 0));
-		defaultNodes.Add("CHEST", new Vector3(0, 202, 0));
-		defaultNodes.Add("NECK", new Vector3(0, 237, 0));
-		defaultNodes.Add("HEAD", new Vector3(0, 262, 0));
+		defaultNodes.Add("HIPS", new Vector3(0, 75, 0));
+		defaultNodes.Add("ABDOMEN", new Vector3(0, 100, 0));
+		defaultNodes.Add("CHEST", new Vector3(0, 120, 0));
+		defaultNodes.Add("NECK", new Vector3(0, 130, 0));
+		defaultNodes.Add("HEAD", new Vector3(0, 145, 0));
 
-		defaultNodes.Add("LEFT_HIP", new Vector3(-25, 112, 0));
-		defaultNodes.Add("LEFT_KNEE", new Vector3(-25, 60, 0));
-		defaultNodes.Add("LEFT_ANKLE", new Vector3(-25, 5, 0));
-		defaultNodes.Add("LEFT_TOE", new Vector3(-25, 7, -15));
+		defaultNodes.Add("LEFT_HIP", new Vector3(-12.5f, 75, 0));
+		defaultNodes.Add("LEFT_KNEE", new Vector3(-12.5f, 35, 0));
+		defaultNodes.Add("LEFT_ANKLE", new Vector3(-12.5f, 5, 0));
+		defaultNodes.Add("LEFT_TOE", new Vector3(-12.5f, 7, -15));
 
-		defaultNodes.Add("RIGHT_HIP", new Vector3(25, 112, 0));
-		defaultNodes.Add("RIGHT_KNEE", new Vector3(25, 60, 0));
-		defaultNodes.Add("RIGHT_ANKLE", new Vector3(25, 5, 0));
-		defaultNodes.Add("RIGHT_TOE", new Vector3(25, 7, -15));
+		defaultNodes.Add("RIGHT_HIP", new Vector3(12.5f, 75, 0));
+		defaultNodes.Add("RIGHT_KNEE", new Vector3(12.5f, 35, 0));
+		defaultNodes.Add("RIGHT_ANKLE", new Vector3(12.5f, 5, 0));
+		defaultNodes.Add("RIGHT_TOE", new Vector3(12.5f, 7, -15));
 
-		defaultNodes.Add("LEFT_COLLAR", new Vector3(-25, 207, 0));
-		defaultNodes.Add("LEFT_SHOULDER", new Vector3(-50, 212, 0));
-		defaultNodes.Add("LEFT_ELBOW", new Vector3(-50, 177, 0));
-		defaultNodes.Add("LEFT_WRIST", new Vector3(-50, 137, 0));
-		defaultNodes.Add("LEFT_HAND", new Vector3(-50, 125, 0));
+		defaultNodes.Add("LEFT_COLLAR", new Vector3(-10, 125, 0));
+		defaultNodes.Add("LEFT_SHOULDER", new Vector3(-50, 125, 0));
+		defaultNodes.Add("LEFT_ELBOW", new Vector3(-50, 100, 0));
+		defaultNodes.Add("LEFT_WRIST", new Vector3(-50, 75, 0));
+		defaultNodes.Add("LEFT_HAND", new Vector3(-50, 70, 0));
 
-		defaultNodes.Add("RIGHT_COLLAR", new Vector3(25, 207, 0));
-		defaultNodes.Add("RIGHT_SHOULDER", new Vector3(50, 212, 0));
-		defaultNodes.Add("RIGHT_ELBOW", new Vector3(50, 177, 0));
-		defaultNodes.Add("RIGHT_WRIST", new Vector3(50, 137, 0));
-		defaultNodes.Add("RIGHT_HAND", new Vector3(50, 125, 0));
+		defaultNodes.Add("RIGHT_COLLAR", new Vector3(10, 125, 0));
+		defaultNodes.Add("RIGHT_SHOULDER", new Vector3(12.5f, 125, 0));
+		defaultNodes.Add("RIGHT_ELBOW", new Vector3(12.5f, 100, 0));
+		defaultNodes.Add("RIGHT_WRIST", new Vector3(12.5f, 75, 0));
+		defaultNodes.Add("RIGHT_HAND", new Vector3(12.5f, 70, 0));
 	}
 	//--------------------------------------------------------
 	// * On OSC Message
@@ -89,6 +91,22 @@ public class RAMActorManager: MonoBehaviour
 			gameObject.SetActive(false);
 		}
 		oscConnection.OscListener.Attach(OscAddress, OnOscMessage);
+
+		if (Kyle != null)
+		{
+			tmpNodes = Kyle.GetComponentsInChildren<Transform>();
+
+			foreach (Transform item in tmpNodes)
+			{
+				if (item.tag.Equals("KyleBones"))
+				{
+					kyleNodes.Add(item.name, item.gameObject);
+				}
+			}
+			Debug.Log(kyleNodes.Count);
+		}
+
+
 	}
 
 	//--------------------------------------------------------
@@ -222,7 +240,7 @@ public class RAMActorManager: MonoBehaviour
 							if (newMessage[i].Equals(node.Key))
 							{
 								//Debug.Log("Current Actor: "+actor.Key+" Current Limb: " + node.Key);
-								positions.Add(node.Key,new Vector3((float)newMessage[i + 1], (float)newMessage[i + 2], (float)newMessage[i + 3]));
+								positions.Add(node.Key,new Vector3(((float)newMessage[i + 1])*0.1f, ((float)newMessage[i + 2]) * 0.1f, ((float)newMessage[i + 3]) * 0.1f));
 								rotations.Add(node.Key, new Quaternion((float)newMessage[i + 4], (float)newMessage[i + 5], (float)newMessage[i + 6], (float)newMessage[i + 7])); //new Vector3((float)newMessage[i + 1], (float)newMessage[i + 2], (float)newMessage[i + 3]));
 							}
 						}
@@ -238,8 +256,25 @@ public class RAMActorManager: MonoBehaviour
 
 		if (actors.ContainsKey(WhichActor))
 		{
-			trail1.transform.position = actors[WhichActor].GetLimbCoordinates(WhichJoint1);
-			trail2.transform.position = actors[WhichActor].GetLimbCoordinates(WhichJoint2);
+
+			if (Kyle != null)
+			{
+				foreach (KeyValuePair<string, GameObject> obj in kyleNodes)
+				{
+					kyleNodes[obj.Key].transform.position = actors[WhichActor].GetLimbCoordinates(obj.Key) + new Vector3(-250,0,0);
+					//kyleNodes[obj.Key].transform.rotation = actors[WhichActor].GetLimbRotation(obj.Key);
+				}
+			}
+
+			if (trail1 != null)
+			{
+				trail1.transform.position = actors[WhichActor].GetLimbCoordinates(WhichJoint1);
+			}
+
+			if (trail2 != null)
+			{
+				trail2.transform.position = actors[WhichActor].GetLimbCoordinates(WhichJoint2);
+			}
 		}
 	}
 }
